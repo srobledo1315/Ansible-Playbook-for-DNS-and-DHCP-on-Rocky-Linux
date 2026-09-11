@@ -3,6 +3,7 @@
 
 Vagrant.configure("2") do |config|
   config.vm.box = "rockylinux/9"
+  config.vm.box_version = "5.0.0"
   config.vm.hostname = "rocky-infra-01"
 
   # Configuración de red privada para el laboratorio DNS/DHCP
