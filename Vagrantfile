@@ -8,7 +8,7 @@ Vagrant.configure("2") do |config|
   # Servidor DNS y DHCP (rocky-infra-01)
   config.vm.define "server", primary: true do |server|
     server.vm.hostname = "rocky-infra-01"
-    server.vm.network "private_network", ip: "192.168.10.10"
+    server.vm.network "private_network", ip: "192.168.10.10", virtualbox__intnet: "lab_net"
 
     server.vm.provider "virtualbox" do |vb|
       vb.name = "rocky-infra-01"
@@ -20,7 +20,7 @@ Vagrant.configure("2") do |config|
   # Cliente de Red (rocky-client-01) - Recibe IP por DHCP desde rocky-infra-01
   config.vm.define "client" do |client|
     client.vm.hostname = "rocky-client-01"
-    client.vm.network "private_network", type: "dhcp"
+    client.vm.network "private_network", type: "dhcp", virtualbox__intnet: "lab_net"
 
     client.vm.provider "virtualbox" do |vb|
       vb.name = "rocky-client-01"
