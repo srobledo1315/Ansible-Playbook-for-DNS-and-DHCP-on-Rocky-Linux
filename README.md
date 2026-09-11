@@ -108,7 +108,7 @@ Revisa el archivo `inventory/hosts.ini` (preconfigurado para el entorno Vagrant 
 
 ```ini
 [infra_servers]
-rocky-infra-01 ansible_host=192.168.10.10 ansible_user=vagrant
+rocky-infra-01 ansible_host=127.0.0.1 ansible_port=2222 ansible_user=vagrant
 ```
 
 ### 4. Personalizar Variables (Opcional)
@@ -132,13 +132,13 @@ dhcp_range_end: "192.168.10.200"
 - **Ejecución en Modo Simulación (Dry-Run / Check mode)**:
   Permite ver qué cambios se realizarían en el servidor sin aplicar nada:
   ```bash
-  ansible-playbook -i inventory/hosts.ini site.yml --check --diff
+  ansible-playbook site.yml --check --diff
   ```
 
 - **Ejecución Real (Despliegue)**:
   Aplica la configuración completa en el servidor:
   ```bash
-  ansible-playbook -i inventory/hosts.ini site.yml
+  ansible-playbook site.yml
   ```
 
 - **Prueba de Idempotencia**:
