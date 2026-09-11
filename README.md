@@ -141,85 +141,90 @@ dhcp_range_end: "192.168.10.200"
 
 ---
 
-##  Acceso y Verificación
+## Acceso y Verificación en Múltiples Terminales
 
-### 1. Acceso y Validación en el Servidor (DNS/DHCP Server)
+Para realizar las pruebas del laboratorio de manera interactiva y en tiempo real, se recomienda abrir dos ventanas o pestañas de terminal independientes.
 
-Accede mediante SSH a la VM configurada:
+### Terminal 1: Conexión al Servidor DNS/DHCP (`rocky-infra-01`)
+
+En la primera terminal, navega a la carpeta del proyecto e inicia sesión por SSH en el servidor:
 
 ```bash
+cd /ruta/a/Ansible-Playbook-for-DNS-and-DHCP-on-Rocky-Linux
 vagrant ssh
-# o manualmente:
-# ssh vagrant@192.168.10.10
 ```
 
-Una vez dentro del servidor, verifica que los servicios estén activos y escuchando en sus respectivos puertos:
+O conéctate directamente por IP si utilizas otro cliente SSH:
+```bash
+ssh vagrant@192.168.10.10
+```
 
-- **Estado de los servicios**:
-  ```bash
-  systemctl status named dhcpd
-  ```
+Dentro del servidor, puedes validar los servicios y monitorear logs en tiempo real:
 
-- **Puertos escuchando (`53` TCP/UDP y `67` UDP)**:
-  ```bash
-  ss -tulpn | grep -E ':(53|67)'
-  ```
+1. **Estado de los servicios**:
+   ```bash
+   systemctl status named dhcpd
+   ```
 
-- **Reglas del Firewall**:
-  ```bash
-  sudo firewall-cmd --list-all
-  ```
+2. **Puertos escuchando (`53` TCP/UDP y `67` UDP)**:
+   ```bash
+   ss -tulpn | grep -E ':(53|67)'
+   ```
+
+3. **Monitorear solicitudes y concesiones DHCP en tiempo real**:
+   ```bash
+   sudo tail -f /var/log/messages | grep dhcpd
+   ```
 
 ---
 
-### 2. Acceso y Pruebas desde los Clientes de Red
+### Terminal 2: Conexión al Cliente de Red y Pruebas
 
-Conecta una máquina cliente (Linux o Windows) en la misma red local (`192.168.10.0/24`) e interfaz de red correspondiente.
+En una segunda terminal independiente, conéctate a la máquina cliente (Linux o Windows) en la misma red local (`192.168.10.0/24`).
 
-#### A. Verificación de DHCP en el Cliente
+#### Conexión a Cliente Linux:
 
-##### En Cliente Linux:
-1. Solicita o renueva la dirección IP por DHCP:
+1. **Acceder a la terminal del cliente**:
+   ```bash
+   ssh usuario@ip-del-cliente
+   # O si utilizas una máquina cliente administrada por Vagrant:
+   # vagrant ssh cliente
+   ```
+
+2. **Solicitar / Renovar dirección IP por DHCP**:
    ```bash
    sudo dhclient -v -r eth0   # Liberar IP
    sudo dhclient -v eth0      # Solicitar nueva IP
    ```
-2. Revisa la IP asignada y la configuración de DNS:
+
+3. **Verificar IP asignada y servidor DNS**:
    ```bash
    ip a
    cat /etc/resolv.conf
    ```
    *Debe mostrar una IP en el rango `.100 - .200` y `nameserver 192.168.10.10` con `search santiago.gomez.lab`.*
 
-##### En Cliente Windows:
-1. En un símbolo del sistema (`cmd`):
+4. **Probar resolución de nombres DNS**:
+   ```bash
+   dig @192.168.10.10 ns1.santiago.gomez.lab
+   dig @192.168.10.10 -x 192.168.10.10
+   dig @192.168.10.10 google.com
+   ```
+
+#### Conexión a Cliente Windows:
+
+1. **Abrir Símbolo del Sistema (CMD) o PowerShell en la máquina cliente**.
+
+2. **Renovar dirección IP por DHCP**:
    ```cmd
    ipconfig /release
    ipconfig /renew
    ipconfig /all
    ```
-2. Verifica que el Servidor DHCP y el Servidor DNS apunten a `192.168.10.10`.
 
----
-
-#### B. Verificación de Resolución DNS en el Cliente
-
-Desde cualquier cliente conectado a la red o desde el mismo servidor:
-
-1. **Resolución Directa (A Record)**:
-   ```bash
-   dig @192.168.10.10 ns1.santiago.gomez.lab
+3. **Probar resolución de nombres DNS**:
+   ```cmd
    nslookup server1.santiago.gomez.lab 192.168.10.10
-   ```
-
-2. **Resolución Inversa (PTR Record)**:
-   ```bash
-   dig @192.168.10.10 -x 192.168.10.10
-   nslookup 192.168.10.20 192.168.10.10
-   ```
-
-3. **Resolución Externa (Forwarding a internet)**:
-   ```bash
-   dig @192.168.10.10 google.com
+   nslookup 192.168.10.10 192.168.10.10
    nslookup google.com 192.168.10.10
    ```
