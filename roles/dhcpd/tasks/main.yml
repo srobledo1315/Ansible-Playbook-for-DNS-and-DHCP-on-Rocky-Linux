@@ -9,8 +9,10 @@
     service: dhcp
     permanent: true
     state: enabled
-    immediate: true
-  ignore_errors: true
+  register: dhcp_firewalld_result
+  failed_when:
+    - dhcp_firewalld_result.failed
+    - "'is not running' not in dhcp_firewalld_result.msg | default('')"
 
 - name: Asegurar que DHCP escuche solo en la interfaz definida
   ansible.builtin.lineinfile:
@@ -18,7 +20,8 @@
     regexp: '^DHCPDARGS='
     line: 'DHCPDARGS="{{ dhcp_interface }}"'
     create: true
-  notify: restart dhcpd
+    mode: '0644'
+  notify: Restart dhcpd
 
 - name: Desplegar configuración de dhcpd con validación sintáctica
   ansible.builtin.template:
@@ -28,11 +31,10 @@
     group: root
     mode: '0644'
     validate: 'dhcpd -t -cf %s'
-  notify: restart dhcpd
+  notify: Restart dhcpd
 
 - name: Asegurar que el servicio DHCP está habilitado y en ejecución
   ansible.builtin.service:
     name: dhcpd
     state: started
     enabled: true
-

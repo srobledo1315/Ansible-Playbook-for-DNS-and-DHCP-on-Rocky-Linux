@@ -4,7 +4,7 @@ Este repositorio contiene la solución completa automatizada con **Ansible** par
 
 ---
 
-##  Descripción Completa del Ejercicio
+## 🚀 Descripción Completa del Ejercicio
 
 El objetivo de este proyecto es la instalación e integración idempotente y verificable de la infraestructura de red primaria para un entorno de laboratorio o producción interna en la familia RHEL (Rocky Linux 9).
 
@@ -32,7 +32,7 @@ El objetivo de este proyecto es la instalación e integración idempotente y ver
 
 ---
 
-## Estructura del Repositorio
+## 📁 Estructura del Repositorio
 
 ```text
 .
@@ -41,6 +41,7 @@ El objetivo de este proyecto es la instalación e integración idempotente y ver
 │       └── ci.yml             # Integración continua (Ansible-Lint)
 ├── .gitignore                 # Exclusiones de Git
 ├── README.md                  # Documentación del proyecto
+├── Vagrantfile                # Configuración de máquina virtual local (Rocky Linux 9)
 ├── ansible.cfg                # Configuración global de Ansible
 ├── group_vars/
 │   └── all.yml                # Variables globales (Dominio, IPs, Pools, Reservas)
@@ -65,7 +66,7 @@ El objetivo de este proyecto es la instalación e integración idempotente y ver
 
 ---
 
-## Requisitos Previos
+## 🛠️ Requisitos Previos
 
 - **Nodo de Control (donde ejecutas Ansible)**:
   - Python 3.x
@@ -74,13 +75,15 @@ El objetivo de este proyecto es la instalación e integración idempotente y ver
     ```bash
     ansible-galaxy collection install ansible.posix
     ```
+- **Para Despliegue Local en Entorno de Laboratorio**:
+  - **Vagrant** y **VirtualBox** instalados en tu equipo.
 - **Servidor Objetivo (Target)**:
   - Rocky Linux 9 (o distribución compatible RHEL 9).
   - Acceso por SSH con usuario con permisos de `sudo` sin contraseña (o clave SSH configurada).
 
 ---
 
-## Guía de Ejecución
+## 📋 Guía de Ejecución
 
 ### 1. Ubicación y Carpeta de Trabajo
 Todas las operaciones deben ejecutarse **desde la raíz del repositorio**:
@@ -89,16 +92,24 @@ Todas las operaciones deben ejecutarse **desde la raíz del repositorio**:
 cd /ruta/a/Ansible-Playbook-for-DNS-and-DHCP-on-Rocky-Linux
 ```
 
-### 2. Configurar el Inventario
-Edita el archivo `inventory/hosts.ini` definiendo la IP o FQDN de tu servidor Rocky Linux 9:
+### 2. Iniciar la Máquina Virtual de Laboratorio (Vagrant)
+Si vas a realizar el despliegue en un entorno virtual local en tu PC, inicia la VM con:
+
+```bash
+vagrant up
+```
+*Este comando descarga y arranca una VM con Rocky Linux 9 y la IP fija `192.168.10.10`.*
+
+### 3. Configurar el Inventario
+Revisa el archivo `inventory/hosts.ini` (preconfigurado para el entorno Vagrant local):
 
 ```ini
 [infra_servers]
-rocky-infra-01 ansible_host=192.168.10.10
+rocky-infra-01 ansible_host=192.168.10.10 ansible_user=vagrant
 ```
 
-### 3. Personalizar Variables
-Edita `group_vars/all.yml` según las necesidades de tu red (IPs, dominio, rangos DHCP, interfaz):
+### 4. Personalizar Variables (Opcional)
+Edita `group_vars/all.yml` si deseas adaptar las variables del dominio o subred:
 
 ```yaml
 dns_domain: "santiago.gomez.lab"
@@ -108,7 +119,7 @@ dhcp_range_start: "192.168.10.100"
 dhcp_range_end: "192.168.10.200"
 ```
 
-### 4. Comandos de Ejecución
+### 5. Comandos de Ejecución
 
 - **Verificación de Sintaxis y Linting**:
   ```bash
@@ -132,16 +143,16 @@ dhcp_range_end: "192.168.10.200"
 
 ---
 
-##  Acceso y Verificación
+## 🧪 Acceso y Verificación
 
 ### 1. Acceso y Validación en el Servidor (DNS/DHCP Server)
 
-Accede mediante SSH al servidor configurado:
+Accede mediante SSH a la VM configurada:
 
 ```bash
-ssh vagrant@192.168.10.10
-# o según tu usuario en hosts.ini:
-# ssh usuario@<IP_DEL_SERVIDOR>
+vagrant ssh
+# o manualmente:
+# ssh vagrant@192.168.10.10
 ```
 
 Una vez dentro del servidor, verifica que los servicios estén activos y escuchando en sus respectivos puertos:

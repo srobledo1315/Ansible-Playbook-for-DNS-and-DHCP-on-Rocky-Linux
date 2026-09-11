@@ -1,7 +1,7 @@
 ---
 - name: Aprovisionamiento de Infraestructura Base (DNS/DHCP)
   hosts: infra_servers
-  become: yes
+  become: true
   tasks:
     - name: Asegurar que el sistema está actualizado (opcional, comentado por velocidad)
       # ansible.builtin.dnf: name="*" state="latest"
