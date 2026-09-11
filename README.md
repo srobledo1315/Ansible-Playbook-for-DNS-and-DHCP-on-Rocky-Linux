@@ -90,13 +90,18 @@ Todas las operaciones deben ejecutarse **desde la raíz del repositorio**:
 cd /ruta/a/Ansible-Playbook-for-DNS-and-DHCP-on-Rocky-Linux
 ```
 
-### 2. Iniciar la Máquina Virtual de Laboratorio (Vagrant)
-Si vas a realizar el despliegue en un entorno virtual local en tu PC, inicia la VM con:
+### 2. Iniciar las Máquinas Virtuales de Laboratorio (Vagrant)
+El proyecto incluye un entorno de laboratorio multimáquina con Vagrant:
+- **`server` (`rocky-infra-01`)**: Servidor con Rocky Linux 9 y la IP fija `192.168.10.10`.
+- **`client` (`rocky-client-01`)**: Máquina cliente con Rocky Linux 9 configurada para obtener su IP por DHCP.
+
+Inicia ambas máquinas virtuales ejecutando:
 
 ```bash
 vagrant up
 ```
-*Este comando descarga y arranca una VM con Rocky Linux 9 y la IP fija `192.168.10.10`.*
+
+*(O de forma individual: `vagrant up server` / `vagrant up client`)*
 
 ### 3. Configurar el Inventario
 Revisa el archivo `inventory/hosts.ini` (preconfigurado para el entorno Vagrant local):
@@ -143,30 +148,27 @@ dhcp_range_end: "192.168.10.200"
 
 ## Acceso y Verificación en Múltiples Terminales
 
-Para realizar las pruebas del laboratorio de manera interactiva y en tiempo real, se recomienda abrir dos ventanas o pestañas de terminal independientes.
+Para realizar las pruebas del laboratorio de manera interactiva y en tiempo real, abre dos ventanas o pestañas de terminal independientes.
 
-### Terminal 1: Conexión al Servidor DNS/DHCP (`rocky-infra-01`)
+### Terminal 1: Servidor DNS/DHCP (`rocky-infra-01`)
 
-En la primera terminal, navega a la carpeta del proyecto e inicia sesión por SSH en el servidor:
+En la primera terminal, accede por SSH a la máquina virtual del servidor:
 
 ```bash
 cd /ruta/a/Ansible-Playbook-for-DNS-and-DHCP-on-Rocky-Linux
-vagrant ssh
+vagrant ssh server
 ```
 
-O conéctate directamente por IP si utilizas otro cliente SSH:
-```bash
-ssh vagrant@192.168.10.10
-```
+*(O conectándote directamente por IP: `ssh vagrant@192.168.10.10`)*
 
-Dentro del servidor, puedes validar los servicios y monitorear logs en tiempo real:
+Dentro del servidor, puedes validar los servicios y monitorear las solicitudes de red en tiempo real:
 
-1. **Estado de los servicios**:
+1. **Verificar el estado de los servicios**:
    ```bash
    systemctl status named dhcpd
    ```
 
-2. **Puertos escuchando (`53` TCP/UDP y `67` UDP)**:
+2. **Verificar puertos escuchando (`53` TCP/UDP y `67` UDP)**:
    ```bash
    ss -tulpn | grep -E ':(53|67)'
    ```
@@ -178,53 +180,33 @@ Dentro del servidor, puedes validar los servicios y monitorear logs en tiempo re
 
 ---
 
-### Terminal 2: Conexión al Cliente de Red y Pruebas
+### Terminal 2: Cliente de Red (`rocky-client-01`)
 
-En una segunda terminal independiente, conéctate a la máquina cliente (Linux o Windows) en la misma red local (`192.168.10.0/24`).
+En la segunda terminal, accede por SSH a la máquina virtual del cliente:
 
-#### Conexión a Cliente Linux:
+```bash
+cd /ruta/a/Ansible-Playbook-for-DNS-and-DHCP-on-Rocky-Linux
+vagrant ssh client
+```
 
-1. **Acceder a la terminal del cliente**:
+Dentro del cliente, ejecuta las pruebas de solicitud de IP por DHCP y resolución de nombres DNS contra el servidor:
+
+1. **Solicitar / Renovar dirección IP por DHCP**:
    ```bash
-   ssh usuario@ip-del-cliente
-   # O si utilizas una máquina cliente administrada por Vagrant:
-   # vagrant ssh cliente
+   sudo dhclient -v -r eth1   # Liberar IP previa en la interfaz de red privada
+   sudo dhclient -v eth1      # Solicitar nueva IP al servidor DHCP (192.168.10.10)
    ```
 
-2. **Solicitar / Renovar dirección IP por DHCP**:
+2. **Verificar IP asignada y servidor DNS configurado**:
    ```bash
-   sudo dhclient -v -r eth0   # Liberar IP
-   sudo dhclient -v eth0      # Solicitar nueva IP
-   ```
-
-3. **Verificar IP asignada y servidor DNS**:
-   ```bash
-   ip a
+   ip a show eth1
    cat /etc/resolv.conf
    ```
-   *Debe mostrar una IP en el rango `.100 - .200` y `nameserver 192.168.10.10` con `search santiago.gomez.lab`.*
+   *Debe mostrar una IP dentro del rango del pool `.100 - .200` y `nameserver 192.168.10.10` con `search santiago.gomez.lab`.*
 
-4. **Probar resolución de nombres DNS**:
+3. **Probar resolución de nombres DNS**:
    ```bash
    dig @192.168.10.10 ns1.santiago.gomez.lab
    dig @192.168.10.10 -x 192.168.10.10
    dig @192.168.10.10 google.com
-   ```
-
-#### Conexión a Cliente Windows:
-
-1. **Abrir Símbolo del Sistema (CMD) o PowerShell en la máquina cliente**.
-
-2. **Renovar dirección IP por DHCP**:
-   ```cmd
-   ipconfig /release
-   ipconfig /renew
-   ipconfig /all
-   ```
-
-3. **Probar resolución de nombres DNS**:
-   ```cmd
-   nslookup server1.santiago.gomez.lab 192.168.10.10
-   nslookup 192.168.10.10 192.168.10.10
-   nslookup google.com 192.168.10.10
    ```
