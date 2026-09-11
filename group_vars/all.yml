@@ -1,28 +1,38 @@
 ---
-# Global variables for DNS & DHCP on Rocky Linux
+# =========================================
+# VARIABLES GLOBALES: DNS (BIND9) & DHCPD
+# =========================================
 
-# Domain configuration
-domain_name: "example.local"
-dns_primary_ip: "192.168.1.10"
-network_cidr: "192.168.1.0/24"
-network_netmask: "255.255.255.0"
-network_gateway: "192.168.1.1"
+# --- DNS Bind Variables ---
+dns_domain: "santiago.gomez.lab"
+dns_server_ip: "192.168.10.10"
+dns_serial: "2026091001" # Cambiar manualmente al actualizar zonas para propagar a esclavos
+dns_reverse_zone: "10.168.192.in-addr.arpa"
 
-# DNS BIND variables
 dns_forwarders:
   - "8.8.8.8"
-  - "8.8.4.4"
+  - "1.1.1.1"
 
-dns_records:
-  - name: "ns1"
-    ip: "192.168.1.10"
-  - name: "router"
-    ip: "192.168.1.1"
+dns_allow_query:
+  - "127.0.0.0/8"
+  - "192.168.10.0/24"
 
-# DHCP variables
-dhcp_subnet: "192.168.1.0"
+dns_records_a:
+  - { name: "ns1", ip: "192.168.10.10" }
+  - { name: "router", ip: "192.168.10.1" }
+  - { name: "server1", ip: "192.168.10.20" }
+
+# --- DHCP Variables ---
+dhcp_interface: "eth1" # EJEMPLO: Asegúrate de que esta interfaz exista en Rocky 9
+dhcp_subnet: "192.168.10.0"
 dhcp_netmask: "255.255.255.0"
-dhcp_range_start: "192.168.1.100"
-dhcp_range_end: "192.168.1.200"
-dhcp_routers: "192.168.1.1"
-dhcp_dns_servers: "192.168.1.10"
+dhcp_range_start: "192.168.10.100"
+dhcp_range_end: "192.168.10.200"
+dhcp_gateway: "192.168.10.1"
+dhcp_broadcast: "192.168.10.255"
+
+dhcp_default_lease: 86400
+dhcp_max_lease: 172800
+
+dhcp_reservations:
+  - { name: "manager-pc", mac: "00:11:22:33:44:55", ip: "192.168.10.50" }

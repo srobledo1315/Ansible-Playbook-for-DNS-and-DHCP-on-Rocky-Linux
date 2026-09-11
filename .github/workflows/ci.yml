@@ -1,28 +1,22 @@
-name: CI
+name: Ansible Lint
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [ "main", "master" ]
   pull_request:
-    branches: [ main, master ]
+    branches: [ "main", "master" ]
 
 jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
+      - uses: actions/checkout@v3
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v4
         with:
           python-version: '3.x'
-
-      - name: Install dependencies
+      - name: Install ansible and ansible-lint
         run: |
-          python -m pip install --upgrade pip
           pip install ansible ansible-lint
-
-      - name: Run Ansible Lint
-        run: |
-          ansible-lint site.yml || true
+      - name: Run ansible-lint
+        run: ansible-lint site.yml

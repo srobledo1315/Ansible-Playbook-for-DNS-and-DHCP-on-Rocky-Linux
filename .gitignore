@@ -1,7 +1,4 @@
 *.retry
-*.pyc
-*.swp
-.retry
-.cache/
 .ansible/
 *.log
+.DS_Store

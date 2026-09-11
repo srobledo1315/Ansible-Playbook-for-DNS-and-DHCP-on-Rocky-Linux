@@ -1,28 +1,37 @@
 ---
-- name: Install DHCP server package
+- name: Instalar paquete DHCP
   ansible.builtin.package:
-    name: "{{ dhcp_package_name }}"
+    name: "{{ dhcp_packages }}"
     state: present
 
-- name: Configure dhcpd.conf
+- name: Habilitar puerto DHCP en firewalld
+  ansible.posix.firewalld:
+    service: dhcp
+    permanent: yes
+    state: enabled
+    immediate: yes
+  ignore_errors: yes
+
+- name: Asegurar que DHCP escuche solo en la interfaz definida
+  ansible.builtin.lineinfile:
+    path: /etc/sysconfig/dhcpd
+    regexp: '^DHCPDARGS='
+    line: 'DHCPDARGS="{{ dhcp_interface }}"'
+    create: yes
+  notify: restart dhcpd
+
+- name: Desplegar configuración de dhcpd con validación sintáctica
   ansible.builtin.template:
     src: dhcpd.conf.j2
-    dest: "{{ dhcp_config_path }}"
+    dest: /etc/dhcp/dhcpd.conf
     owner: root
     group: root
     mode: '0644'
+    validate: 'dhcpd -t -cf %s'
   notify: restart dhcpd
 
-- name: Ensure firewalld permits DHCP service
-  ansible.posix.firewalld:
-    service: dhcp
-    permanent: true
-    state: enabled
-    immediate: true
-  ignore_errors: true
-
-- name: Ensure DHCP service is started and enabled
+- name: Asegurar que el servicio DHCP está habilitado y en ejecución
   ansible.builtin.service:
-    name: "{{ dhcp_service_name }}"
+    name: dhcpd
     state: started
-    enabled: true
+    enabled: yes

@@ -1,7 +1,5 @@
 ---
-bind_packages:
+# Valores por defecto del rol. Sobrescritos por group_vars/all.yml
+dns_bind_packages:
   - bind
   - bind-utils
-bind_service_name: named
-bind_config_path: /etc/named.conf
-bind_zone_dir: /var/named

@@ -1,47 +1,49 @@
 ---
-- name: Install BIND DNS packages
+- name: Instalar paquetes de BIND9
   ansible.builtin.package:
-    name: "{{ item }}"
+    name: "{{ dns_bind_packages }}"
     state: present
-  loop: "{{ bind_packages }}"
 
-- name: Configure named.conf
-  ansible.builtin.template:
-    src: named.conf.j2
-    dest: "{{ bind_config_path }}"
-    owner: root
-    group: named
-    mode: '0640'
-  notify: restart named
-
-- name: Configure forward zone file
-  ansible.builtin.template:
-    src: zone.forward.j2
-    dest: "{{ bind_zone_dir }}/{{ domain_name }}.db"
-    owner: root
-    group: named
-    mode: '0640'
-  notify: restart named
-
-- name: Configure reverse zone file
-  ansible.builtin.template:
-    src: zone.reverse.j2
-    dest: "{{ bind_zone_dir }}/1.168.192.in-addr.arpa.db"
-    owner: root
-    group: named
-    mode: '0640'
-  notify: restart named
-
-- name: Ensure firewalld permits DNS service
+- name: Habilitar puertos DNS en firewalld
   ansible.posix.firewalld:
     service: dns
-    permanent: true
+    permanent: yes
     state: enabled
-    immediate: true
-  ignore_errors: true
+    immediate: yes
+  ignore_errors: yes # Previene fallos si firewalld no está instalado/activo
 
-- name: Ensure BIND service is started and enabled
+- name: Desplegar configuración principal (named.conf) con validación
+  ansible.builtin.template:
+    src: named.conf.j2
+    dest: /etc/named.conf
+    owner: root
+    group: named
+    mode: '0640'
+    validate: 'named-checkconf %s'
+  notify: restart named
+
+- name: Desplegar zona de búsqueda directa con validación
+  ansible.builtin.template:
+    src: zone.forward.j2
+    dest: /var/named/{{ dns_domain }}.db
+    owner: root
+    group: named
+    mode: '0640'
+    validate: 'named-checkzone {{ dns_domain }} %s'
+  notify: reload named
+
+- name: Desplegar zona de búsqueda inversa con validación
+  ansible.builtin.template:
+    src: zone.reverse.j2
+    dest: /var/named/{{ dns_reverse_zone }}.db
+    owner: root
+    group: named
+    mode: '0640'
+    validate: 'named-checkzone {{ dns_reverse_zone }} %s'
+  notify: reload named
+
+- name: Asegurar que el servicio BIND (named) está habilitado y en ejecución
   ansible.builtin.service:
-    name: "{{ bind_service_name }}"
+    name: named
     state: started
-    enabled: true
+    enabled: yes
