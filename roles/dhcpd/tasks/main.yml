@@ -7,17 +7,17 @@
 - name: Habilitar puerto DHCP en firewalld
   ansible.posix.firewalld:
     service: dhcp
-    permanent: yes
+    permanent: true
     state: enabled
-    immediate: yes
-  ignore_errors: yes
+    immediate: true
+  ignore_errors: true
 
 - name: Asegurar que DHCP escuche solo en la interfaz definida
   ansible.builtin.lineinfile:
     path: /etc/sysconfig/dhcpd
     regexp: '^DHCPDARGS='
     line: 'DHCPDARGS="{{ dhcp_interface }}"'
-    create: yes
+    create: true
   notify: restart dhcpd
 
 - name: Desplegar configuración de dhcpd con validación sintáctica
@@ -34,4 +34,5 @@
   ansible.builtin.service:
     name: dhcpd
     state: started
-    enabled: yes
+    enabled: true
+

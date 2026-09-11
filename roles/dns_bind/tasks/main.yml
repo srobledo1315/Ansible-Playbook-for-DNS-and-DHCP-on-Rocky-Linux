@@ -7,10 +7,10 @@
 - name: Habilitar puertos DNS en firewalld
   ansible.posix.firewalld:
     service: dns
-    permanent: yes
+    permanent: true
     state: enabled
-    immediate: yes
-  ignore_errors: yes # Previene fallos si firewalld no está instalado/activo
+    immediate: true
+  ignore_errors: true # Previene fallos si firewalld no está instalado/activo
 
 - name: Desplegar configuración principal (named.conf) con validación
   ansible.builtin.template:
@@ -46,4 +46,5 @@
   ansible.builtin.service:
     name: named
     state: started
-    enabled: yes
+    enabled: true
+
