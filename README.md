@@ -2,9 +2,9 @@
 
 Este repositorio contiene la solución completa automatizada con **Ansible** para desplegar, configurar y administrar los servicios core de red **DNS (BIND9/named)** y **DHCP (dhcpd)** en servidores **Rocky Linux 9**. El dominio predeterminado configurado es `santiago.gomez.lab`.
 
----
 
-## 🚀 Descripción Completa del Ejercicio
+
+## Descripción Completa del Ejercicio
 
 El objetivo de este proyecto es la instalación e integración idempotente y verificable de la infraestructura de red primaria para un entorno de laboratorio o producción interna en la familia RHEL (Rocky Linux 9).
 
@@ -30,9 +30,8 @@ El objetivo de este proyecto es la instalación e integración idempotente y ver
      - **DHCP**: `67/udp`
    - Los archivos de configuración se despliegan en las rutas estándar (`/etc/named.conf`, `/var/named/`, `/etc/dhcp/dhcpd.conf`) garantizando compatibilidad nativa con **SELinux** en modo *Enforcing*.
 
----
 
-## 📁 Estructura del Repositorio
+## Estructura del Repositorio
 
 ```text
 .
@@ -66,7 +65,7 @@ El objetivo de este proyecto es la instalación e integración idempotente y ver
 
 ---
 
-## 🛠️ Requisitos Previos
+## Requisitos Previos
 
 - **Nodo de Control (donde ejecutas Ansible)**:
   - Python 3.x
@@ -81,9 +80,8 @@ El objetivo de este proyecto es la instalación e integración idempotente y ver
   - Rocky Linux 9 (o distribución compatible RHEL 9).
   - Acceso por SSH con usuario con permisos de `sudo` sin contraseña (o clave SSH configurada).
 
----
 
-## 📋 Guía de Ejecución
+## Guía de Ejecución
 
 ### 1. Ubicación y Carpeta de Trabajo
 Todas las operaciones deben ejecutarse **desde la raíz del repositorio**:
@@ -143,7 +141,7 @@ dhcp_range_end: "192.168.10.200"
 
 ---
 
-## 🧪 Acceso y Verificación
+##  Acceso y Verificación
 
 ### 1. Acceso y Validación en el Servidor (DNS/DHCP Server)
 
