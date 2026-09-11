@@ -1,0 +1,12 @@
+---
+- name: Configure DNS (BIND) Server
+  hosts: dns_servers
+  become: true
+  roles:
+    - dns_bind
+
+- name: Configure DHCP Server
+  hosts: dhcp_servers
+  become: true
+  roles:
+    - dhcpd

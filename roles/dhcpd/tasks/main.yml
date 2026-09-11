@@ -1,0 +1,28 @@
+---
+- name: Install DHCP server package
+  ansible.builtin.package:
+    name: "{{ dhcp_package_name }}"
+    state: present
+
+- name: Configure dhcpd.conf
+  ansible.builtin.template:
+    src: dhcpd.conf.j2
+    dest: "{{ dhcp_config_path }}"
+    owner: root
+    group: root
+    mode: '0644'
+  notify: restart dhcpd
+
+- name: Ensure firewalld permits DHCP service
+  ansible.posix.firewalld:
+    service: dhcp
+    permanent: true
+    state: enabled
+    immediate: true
+  ignore_errors: true
+
+- name: Ensure DHCP service is started and enabled
+  ansible.builtin.service:
+    name: "{{ dhcp_service_name }}"
+    state: started
+    enabled: true

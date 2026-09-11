@@ -1,0 +1,47 @@
+---
+- name: Install BIND DNS packages
+  ansible.builtin.package:
+    name: "{{ item }}"
+    state: present
+  loop: "{{ bind_packages }}"
+
+- name: Configure named.conf
+  ansible.builtin.template:
+    src: named.conf.j2
+    dest: "{{ bind_config_path }}"
+    owner: root
+    group: named
+    mode: '0640'
+  notify: restart named
+
+- name: Configure forward zone file
+  ansible.builtin.template:
+    src: zone.forward.j2
+    dest: "{{ bind_zone_dir }}/{{ domain_name }}.db"
+    owner: root
+    group: named
+    mode: '0640'
+  notify: restart named
+
+- name: Configure reverse zone file
+  ansible.builtin.template:
+    src: zone.reverse.j2
+    dest: "{{ bind_zone_dir }}/1.168.192.in-addr.arpa.db"
+    owner: root
+    group: named
+    mode: '0640'
+  notify: restart named
+
+- name: Ensure firewalld permits DNS service
+  ansible.posix.firewalld:
+    service: dns
+    permanent: true
+    state: enabled
+    immediate: true
+  ignore_errors: true
+
+- name: Ensure BIND service is started and enabled
+  ansible.builtin.service:
+    name: "{{ bind_service_name }}"
+    state: started
+    enabled: true

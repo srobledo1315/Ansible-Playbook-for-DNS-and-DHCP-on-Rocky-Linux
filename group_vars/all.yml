@@ -1,0 +1,28 @@
+---
+# Global variables for DNS & DHCP on Rocky Linux
+
+# Domain configuration
+domain_name: "example.local"
+dns_primary_ip: "192.168.1.10"
+network_cidr: "192.168.1.0/24"
+network_netmask: "255.255.255.0"
+network_gateway: "192.168.1.1"
+
+# DNS BIND variables
+dns_forwarders:
+  - "8.8.8.8"
+  - "8.8.4.4"
+
+dns_records:
+  - name: "ns1"
+    ip: "192.168.1.10"
+  - name: "router"
+    ip: "192.168.1.1"
+
+# DHCP variables
+dhcp_subnet: "192.168.1.0"
+dhcp_netmask: "255.255.255.0"
+dhcp_range_start: "192.168.1.100"
+dhcp_range_end: "192.168.1.200"
+dhcp_routers: "192.168.1.1"
+dhcp_dns_servers: "192.168.1.10"

@@ -1,0 +1,4 @@
+---
+dhcp_package_name: dhcp-server
+dhcp_service_name: dhcpd
+dhcp_config_path: /etc/dhcp/dhcpd.conf
